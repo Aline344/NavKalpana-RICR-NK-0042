@@ -85,9 +85,9 @@ Students preparing for placements face:
 | **Vite** | Build Tool & Dev Server |
 | **Framer Motion** | Animations & Transitions |
 | **Tailwind CSS** | Utility-first Styling |
-| **Axios** | HTTP Client |
+| **Axios** | HTTP frontend |
 | **Lucide React** | Icon Library |
-| **React Router DOM** | Client-side Routing |
+| **React Router DOM** | frontend-side Routing |
 
 ### Backend
 | Technology | Purpose |
@@ -218,7 +218,7 @@ npm run dev
 ### 3. Setup Frontend
 
 ```bash
-cd client
+cd frontend
 npm install
 npm run dev
 ```
