@@ -1,5 +1,5 @@
 {
-    "name": "acie-client",
+    "name": "acie-frontend",
     "private": true,
     "version": "1.0.0",
     "type": "module",
