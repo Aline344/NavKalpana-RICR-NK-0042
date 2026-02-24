@@ -12,7 +12,7 @@ This repository contains NavKalpana project files.
 # 🧠 AI Career Intelligence Engine (ACIE)
 
 ### AI-Powered Preparation-to-Placement Platform
-
+https://nav-kalpana-ricr-nk-0042-o7uv.vercel.app
 
 ---
 
