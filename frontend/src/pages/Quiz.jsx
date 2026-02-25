@@ -12,7 +12,20 @@ const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
 const Quiz = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [topic, setTopic] = useState('JavaScript');
+    const roleSkills = {
+        'Frontend Developer': ['JavaScript', 'React', 'HTML/CSS', 'TypeScript', 'Redux', 'System Design'],
+        'Backend Developer': ['Node.js', 'SQL', 'MongoDB', 'Python', 'Redis', 'Docker', 'System Design'],
+        'Full Stack Developer': ['JavaScript', 'React', 'Node.js', 'SQL', 'MongoDB', 'System Design'],
+        'Data Scientist': ['Python', 'SQL', 'Pandas', 'NumPy', 'Machine Learning', 'Statistics'],
+        'DevOps Engineer': ['Docker', 'Kubernetes', 'AWS', 'CI/CD', 'Linux', 'Python'],
+        'Mobile Developer': ['React Native', 'Swift', 'Kotlin', 'JavaScript', 'Mobile UI'],
+        'Product Manager': ['Agile', 'Product Strategy', 'User Research', 'Analytics', 'Market Analysis'],
+        'UX Designer': ['Figma', 'User Research', 'Wireframing', 'Prototyping', 'Visual Design']
+    };
+    const roles = Object.keys(roleSkills);
+
+    const [selectedRole, setSelectedRole] = useState(user?.targetRole || 'Frontend Developer');
+    const [topic, setTopic] = useState(roleSkills[user?.targetRole || 'Frontend Developer']?.[0] || 'JavaScript');
     const [difficulty, setDifficulty] = useState(3);
     const [numQuestions, setNumQuestions] = useState(8);
     const [generating, setGenerating] = useState(false);
@@ -20,8 +33,6 @@ const Quiz = () => {
     const [loadingHistory, setLoadingHistory] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 3;
-
-    const topics = ['JavaScript', 'React', 'Node.js', 'Data Structures', 'Python', 'SQL'];
 
     useEffect(() => {
         fetchHistory();
@@ -137,11 +148,28 @@ const Quiz = () => {
                                 </h2>
 
                                 <div className="space-y-4">
-                                    <div>
-                                        <label className="text-sm text-gray-400 mb-1.5 block">Topic</label>
-                                        <select value={topic} onChange={e => setTopic(e.target.value)} className="input-field">
-                                            {topics.map(t => <option key={t} value={t} className="bg-dark-800">{t}</option>)}
-                                        </select>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-sm text-gray-400 mb-1.5 block">Job Role</label>
+                                            <select
+                                                value={selectedRole}
+                                                onChange={e => {
+                                                    const newRole = e.target.value;
+                                                    setSelectedRole(newRole);
+                                                    setTopic(roleSkills[newRole][0]);
+                                                }}
+                                                className="input-field"
+                                            >
+                                                {roles.map(r => <option key={r} value={r} className="bg-dark-800">{r}</option>)}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="text-sm text-gray-400 mb-1.5 block">Skill Mastery</label>
+                                            <select value={topic} onChange={e => setTopic(e.target.value)} className="input-field">
+                                                {roleSkills[selectedRole]?.map(t => <option key={t} value={t} className="bg-dark-800">{t}</option>)}
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <div>

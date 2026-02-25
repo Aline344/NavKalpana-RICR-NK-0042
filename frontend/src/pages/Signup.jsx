@@ -37,12 +37,10 @@ const Signup = () => {
 
     return (
         <div className="h-full w-full flex items-center justify-center relative overflow-hidden bg-dark-950 px-4 py-4 sm:py-8">
-            {/* ══════════════ DYNAMIC BACKGROUND ══════════════ */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_0%,rgba(168,85,247,0.15),transparent_50%)]" />
                 <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_0%_100%,rgba(99,102,241,0.1),transparent_40%)]" />
 
-                {/* Animated Orbs */}
                 <motion.div
                     animate={{
                         scale: [1, 1.3, 1],
@@ -64,7 +62,6 @@ const Signup = () => {
                     className="absolute bottom-1/4 -left-20 w-96 h-96 bg-primary-600/20 rounded-full blur-[100px]"
                 />
 
-                {/* Visual Texture */}
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
                 <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
             </div>
