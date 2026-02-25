@@ -13,6 +13,9 @@ import Assignment from './pages/Assignment';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
+import InterviewSelection from './pages/InterviewSelection';
+import InterviewSession from './pages/InterviewSession';
+import InterviewReport from './pages/InterviewReport';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
@@ -40,6 +43,9 @@ const AppContent = () => {
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                    <Route path="/interview/select" element={<ProtectedRoute><InterviewSelection /></ProtectedRoute>} />
+                    <Route path="/interview/:id" element={<ProtectedRoute><InterviewSession /></ProtectedRoute>} />
+                    <Route path="/interview/report/:id" element={<ProtectedRoute><InterviewReport /></ProtectedRoute>} />
                 </Routes>
             </main>
             {!isAuthPage && <Footer />}

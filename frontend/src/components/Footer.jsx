@@ -27,7 +27,6 @@ const Footer = () => {
                         </div>
                     </div>
 
-                    {/* Quick Links */}
                     <div>
                         <h4 className="text-white font-semibold mb-4">Quick Links</h4>
                         <ul className="space-y-2">
@@ -37,9 +36,7 @@ const Footer = () => {
                                 </li>
                             ))}
                         </ul>
-                    </div>
-
-                    {/* Features */}
+                    </div> 
                     <div>
                         <h4 className="text-white font-semibold mb-4">Features</h4>
                         <ul className="space-y-2">
@@ -49,7 +46,6 @@ const Footer = () => {
                         </ul>
                     </div>
 
-                    {/* Contact */}
                     <div>
                         <h4 className="text-white font-semibold mb-4">Contact</h4>
                         <ul className="space-y-3">
@@ -66,7 +62,6 @@ const Footer = () => {
                     </div>
                 </div>
 
-                {/* Bottom */}
                 <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-500">
                     <p>© 2026 ACIE. All rights reserved.</p>
                     <p className="flex items-center gap-1">Made with <Heart size={12} className="text-red-500" /> by Team ACIE</p>

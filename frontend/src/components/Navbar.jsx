@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Brain, TrendingUp, FileText, Zap, Code2, LayoutDashboard, ShieldCheck, LogOut, User, ChevronDown } from 'lucide-react';
+import { Menu, X, Brain, TrendingUp, FileText, Zap, Code2, LayoutDashboard, ShieldCheck, LogOut, User, ChevronDown, Briefcase } from 'lucide-react';
 
 const Navbar = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -30,6 +30,7 @@ const Navbar = () => {
 
     const featureLinks = [
         { name: 'Resume', path: '/resume', icon: <FileText size={14} className="text-cyber-400" /> },
+        { name: 'Interview Prep', path: '/interview/select', icon: <Briefcase size={14} className="text-primary-400" /> },
         { name: 'Quiz', path: '/quiz', icon: <Zap size={14} className="text-accent-400" /> },
         { name: 'Assignments', path: '/assignments', icon: <Code2 size={14} className="text-emerald-400" /> },
     ];
@@ -45,7 +46,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-950/80 backdrop-blur-2xl border-b border-white/10">
+        <nav className="fixed top-0 left-0 right-0 z-[9999] bg-dark-950/95 backdrop-blur-2xl border-b border-white/10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
@@ -95,7 +96,8 @@ const Navbar = () => {
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                             transition={{ duration: 0.2 }}
-                                            className="absolute right-0 mt-2 w-56 glass-strong rounded-2xl border border-white/10 shadow-2xl p-2 z-50"
+                                            className="absolute right-0 mt-2 w-56 bg-dark-900 shadow-[0_10px_40px_rgba(0,0,0,0.5)] rounded-2xl border border-white/10 p-2 z-[10000]"
+                                            style={{ background: '#0a0a14' }}
                                         >
                                             <div className="flex flex-col gap-1">
                                                 <Link to="/profile" onClick={() => setProfileOpen(false)}
