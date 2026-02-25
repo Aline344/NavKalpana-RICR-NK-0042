@@ -41,6 +41,22 @@ const userSchema = new mongoose.Schema({
         count: { type: Number, default: 1 },
         lastOccurred: { type: Date, default: Date.now }
     }],
+    careerReadinessScore: { type: Number, default: 0 },
+    crsClassification: { type: String, default: '' },
+    interviewReadinessScore: { type: Number, default: 0 },
+
+    irsClassification: { type: String, default: '' },
+    cciScore: { type: Number, default: 0 },
+    cciClassification: { type: String, default: '' },
+
+    readinessHistory: [{
+        irs: Number,
+        techScore: Number,
+        behavioralScore: Number,
+        cci: Number,
+        crs: Number,
+        timestamp: { type: Date, default: Date.now }
+    }],
     lastActive: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now }
 });

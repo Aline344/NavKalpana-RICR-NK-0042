@@ -68,7 +68,15 @@ export const getDashboardStats = async (req, res) => {
             }));
 
         res.json({
-            user: { name: user.name, email: user.email, targetRole: user.targetRole, avatar: user.avatar, preferredDifficulty: user.preferredDifficulty },
+            user: {
+                name: user.name,
+                email: user.email,
+                targetRole: user.targetRole,
+                avatar: user.avatar,
+                preferredDifficulty: user.preferredDifficulty,
+                skills: user.skills || []
+            },
+
             stats: {
                 totalQuizzes: quizzes.length,
                 completedQuizzes: completedQuizzes.length,
@@ -77,8 +85,19 @@ export const getDashboardStats = async (req, res) => {
                 evaluatedAssignments: evaluatedAssignments.length,
                 avgAssignmentScore,
                 overallMastery,
-                resumeStrength: user.resumeData?.strengthScore || 0
+                resumeStrength: user.resumeData?.strengthScore || 0,
+                careerReadinessScore: user.careerReadinessScore || 0,
+                crsClassification: user.crsClassification || '',
+                interviewReadinessScore: user.interviewReadinessScore || 0,
+
+                irsClassification: user.irsClassification || '',
+                cciScore: user.cciScore || 0,
+                cciClassification: user.cciClassification || '',
+                foundSkills: user.resumeData?.skills || [],
+                missingSkills: user.resumeData?.missingSkills || []
             },
+
+
             topicMastery: user.topicMastery || [],
             heatmap,
             recommendedProjects,
@@ -86,7 +105,27 @@ export const getDashboardStats = async (req, res) => {
             upcomingQuiz,
             pendingAssignments,
             performanceTrend,
+            criticalGaps: (user.mistakeHistory || [])
+                .filter(m => m.count >= 2)
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 3)
+                .map(m => ({ topic: m.topic, concept: m.concept, count: m.count })),
             studyPlan: user.studyPlan || [],
+            readinessHistory: user.readinessHistory || [],
+            growthStats: {
+                improvementPercentage: user.readinessHistory?.length > 1
+                    ? Math.round(((user.readinessHistory[user.readinessHistory.length - 1].crs - user.readinessHistory[0].crs) / (user.readinessHistory[0].crs || 1)) * 100)
+                    : 0,
+                stabilityIndex: user.readinessHistory?.length > 3
+                    ? 100 - (Math.max(...user.readinessHistory.slice(-5).map(h => h.crs)) - Math.min(...user.readinessHistory.slice(-5).map(h => h.crs)))
+                    : 100
+            },
+            recommendedInterviews: (user.resumeData?.missingSkills?.length > 0 ? user.resumeData.missingSkills : highRiskTopics).slice(0, 2).map(skill => ({
+                role: user.targetRole || 'Software Engineer',
+                focusTopic: skill,
+                difficulty: user.preferredDifficulty,
+                cta: 'Start Simulated Interview'
+            })),
             recentActivity: [
                 ...completedQuizzes.map(q => ({ type: 'quiz', id: q._id, title: q.title, score: q.score, date: q.completedAt })),
                 ...evaluatedAssignments.map(a => ({ type: 'assignment', id: a._id, title: a.title, score: a.evaluation?.score, date: a.evaluation?.evaluatedAt }))
