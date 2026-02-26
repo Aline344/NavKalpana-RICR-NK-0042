@@ -43,7 +43,16 @@ export const analyzeResume = async (req, res) => {
         }`;
 
         const aiResponse = await generateAIContent(prompt);
-        const jsonStr = aiResponse.replace(/```json|```/g, '').trim();
+
+        // Robust JSON extraction
+        let jsonStr = aiResponse;
+        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            jsonStr = jsonMatch[0];
+        } else {
+            jsonStr = aiResponse.replace(/```json|```/g, '').trim();
+        }
+
         const analysis = JSON.parse(jsonStr);
 
         // Update user's resume data in database for real-time sync with Dashboard
@@ -63,7 +72,10 @@ export const analyzeResume = async (req, res) => {
         res.json(analysis);
     } catch (error) {
         console.error('Resume Analysis Error:', error);
-        res.status(500).json({ message: 'Failed to analyze resume using AI. Please try again.' });
+        const errorMessage = error.message?.includes('API_KEY_INVALID') || error.message?.includes('API key not valid')
+            ? 'Invalid Gemini API Key. Please check your Backend .env file and ensure GEMINI_API_KEY is correct.'
+            : 'Failed to analyze resume using AI. Please try again.';
+        res.status(500).json({ message: errorMessage });
     }
 };
 

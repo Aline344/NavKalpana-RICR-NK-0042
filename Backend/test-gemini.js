@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve('Backend/.env') });
 import { generateAIContent } from './config/gemini.js';
 
 const test = async () => {

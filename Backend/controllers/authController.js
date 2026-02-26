@@ -28,20 +28,28 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (user && (await user.matchPassword(password))) {
-            user.lastActive = Date.now();
-            await user.save();
-            res.json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                token: generateToken(user._id)
-            });
-        } else {
-            res.status(401).json({ message: 'Invalid email or password' });
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+            return res.status(401).json({ message: 'No account found with this email' });
         }
+
+        const isMatch = await user.matchPassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Incorrect password' });
+        }
+
+        user.lastActive = Date.now();
+        await user.save();
+
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            token: generateToken(user._id)
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
