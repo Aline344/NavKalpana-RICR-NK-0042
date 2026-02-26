@@ -482,7 +482,7 @@ const Dashboard = () => {
                                     {/* Line Chart: Readiness over time */}
                                     <div className="xl:col-span-3 h-[300px] glass p-4 rounded-xl">
                                         <h3 className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Readiness Trends</h3>
-                                        <ResponsiveContainer width="100%" height="100%">
+                                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                                             <LineChart data={trendData}>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
                                                 <XAxis dataKey="time" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
@@ -504,7 +504,7 @@ const Dashboard = () => {
                                     {/* Radar Chart: Skill Gap Evolution */}
                                     <div className="xl:col-span-2 h-[300px] glass p-4 rounded-xl">
                                         <h3 className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Skill Gap Evolution</h3>
-                                        <ResponsiveContainer width="100%" height="100%">
+                                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                                             <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
                                                 <PolarGrid stroke="#ffffff10" />
                                                 <PolarAngleAxis dataKey="topic" tick={{ fill: '#666', fontSize: 10 }} />
