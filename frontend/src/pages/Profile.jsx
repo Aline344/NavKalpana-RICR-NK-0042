@@ -47,8 +47,7 @@ const Profile = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
-            // Optimization: The AuthContext effect will handle user update if we trigger it, 
-            // but for immediate feedback we can rely on local state.
+            
         } catch (err) {
             setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to update profile' });
         } finally {

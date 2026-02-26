@@ -18,7 +18,7 @@ const Login = () => {
         setError('');
         setLoading(true);
         try {
-            const res = await login(email, password);
+            const res = await login(email.trim(), password);
             if (res.role === 'admin') {
                 navigate('/admin');
             } else {
@@ -33,7 +33,7 @@ const Login = () => {
 
     return (
         <div className="h-full w-full flex items-center justify-center relative overflow-hidden bg-dark-950 px-4 py-4 sm:py-8">
-            {/* ══════════════ DYNAMIC BACKGROUND ══════════════ */}
+            {/* ══════════════ DYNAMIC BACKGROUNd ══════════════ */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.15),transparent_50%)]" />
                 <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_100%_100%,rgba(168,85,247,0.1),transparent_40%)]" />

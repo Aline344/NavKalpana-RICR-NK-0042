@@ -118,7 +118,6 @@ const InterviewReport = () => {
                         <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl" />
                     </motion.div>
 
-                    {/* Communication Clarity Index (CCI) */}
                     <motion.div
                         initial="hidden" animate="visible" variants={fadeUp} transition={{ delay: 0.15 }}
                         className="lg:col-span-1 glass border border-white/10 rounded-3xl p-8 flex flex-col relative overflow-hidden"
@@ -163,7 +162,7 @@ const InterviewReport = () => {
                         </div>
                     </motion.div>
 
-                    {/* Dimensions Breakdown */}
+                    {/* */}
                     <motion.div
                         initial="hidden" animate="visible" variants={fadeUp} transition={{ delay: 0.2 }}
                         className="lg:col-span-1 glass border border-white/10 rounded-3xl p-8"

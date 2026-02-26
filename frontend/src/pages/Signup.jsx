@@ -22,7 +22,7 @@ const Signup = () => {
         if (password !== confirmPass) return setError('Passwords do not match');
         setLoading(true);
         try {
-            const res = await register(name, email, password);
+            const res = await register(name, email.trim(), password);
             if (res.role === 'admin') {
                 navigate('/admin');
             } else {
