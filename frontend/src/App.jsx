@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -20,33 +21,60 @@ import InterviewReport from './pages/InterviewReport';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 
+const pageVariants = {
+    initial: { opacity: 0, y: 12 },
+    in: { opacity: 1, y: 0 },
+    out: { opacity: 0, y: -12 }
+};
+
+const pageTransition = {
+    type: 'tween',
+    ease: 'easeInOut',
+    duration: 0.3
+};
+
+const AnimatedPage = ({ children }) => (
+    <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="w-full h-full"
+    >
+        {children}
+    </motion.div>
+);
+
 const AppContent = () => {
     const location = useLocation();
     const isAuthPage = ['/login', '/signup'].includes(location.pathname);
 
     return (
-        <div className={`min-h-screen bg-dark-950 flex flex-col ${isAuthPage ? 'h-screen overflow-hidden' : ''}`}>
+        <div className={`min-h-screen bg-background text-foreground flex flex-col ${isAuthPage ? 'h-screen overflow-hidden' : ''}`}>
             <ScrollToTop />
             {!isAuthPage && <Navbar />}
             <main className="flex-1">
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/about" element={<About />} />
+                <AnimatePresence mode="wait">
+                    <Routes location={location} key={location.pathname}>
+                        <Route path="/" element={<AnimatedPage><Home /></AnimatedPage>} />
+                        <Route path="/login" element={<AnimatedPage><Login /></AnimatedPage>} />
+                        <Route path="/signup" element={<AnimatedPage><Signup /></AnimatedPage>} />
+                        <Route path="/about" element={<AnimatedPage><About /></AnimatedPage>} />
 
-                    {/* Protected Routes */}
-                    <Route path="/resume" element={<ProtectedRoute><Resume /></ProtectedRoute>} />
-                    <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
-                    <Route path="/quiz/:id" element={<ProtectedRoute><QuizAttempt /></ProtectedRoute>} />
-                    <Route path="/assignments" element={<ProtectedRoute><Assignment /></ProtectedRoute>} />
-                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                    <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                    <Route path="/interview/select" element={<ProtectedRoute><InterviewSelection /></ProtectedRoute>} />
-                    <Route path="/interview/:id" element={<ProtectedRoute><InterviewSession /></ProtectedRoute>} />
-                    <Route path="/interview/report/:id" element={<ProtectedRoute><InterviewReport /></ProtectedRoute>} />
-                </Routes>
+                        {/* Protected Routes */}
+                        <Route path="/resume" element={<ProtectedRoute><AnimatedPage><Resume /></AnimatedPage></ProtectedRoute>} />
+                        <Route path="/quiz" element={<ProtectedRoute><AnimatedPage><Quiz /></AnimatedPage></ProtectedRoute>} />
+                        <Route path="/quiz/:id" element={<ProtectedRoute><AnimatedPage><QuizAttempt /></AnimatedPage></ProtectedRoute>} />
+                        <Route path="/assignments" element={<ProtectedRoute><AnimatedPage><Assignment /></AnimatedPage></ProtectedRoute>} />
+                        <Route path="/dashboard" element={<ProtectedRoute><AnimatedPage><Dashboard /></AnimatedPage></ProtectedRoute>} />
+                        <Route path="/profile" element={<ProtectedRoute><AnimatedPage><Profile /></AnimatedPage></ProtectedRoute>} />
+                        <Route path="/admin" element={<ProtectedRoute><AnimatedPage><Admin /></AnimatedPage></ProtectedRoute>} />
+                        <Route path="/interview/select" element={<ProtectedRoute><AnimatedPage><InterviewSelection /></AnimatedPage></ProtectedRoute>} />
+                        <Route path="/interview/:id" element={<ProtectedRoute><AnimatedPage><InterviewSession /></AnimatedPage></ProtectedRoute>} />
+                        <Route path="/interview/report/:id" element={<ProtectedRoute><AnimatedPage><InterviewReport /></AnimatedPage></ProtectedRoute>} />
+                    </Routes>
+                </AnimatePresence>
             </main>
             {!isAuthPage && <Footer />}
         </div>

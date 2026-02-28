@@ -8,7 +8,7 @@ export const Badge = ({ children, variant = 'primary', className = '' }) => {
         danger: "badge-danger",
         cyber: "badge-cyber",
         accent: "badge-accent",
-        neutral: "bg-white/10 text-gray-300 border border-white/20",
+        neutral: "bg-gray-100 text-gray-700 border border-gray-200",
     };
 
     const baseClass = variants[variant] || variants.primary;

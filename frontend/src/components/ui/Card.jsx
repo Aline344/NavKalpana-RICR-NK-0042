@@ -2,9 +2,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export const Card = ({ children, className = '', hover = true, glow = false }) => {
-    const baseClasses = "bg-dark-800 border border-white/10 rounded-2xl p-6";
-    const hoverClasses = hover ? "transition-all duration-300 hover:bg-dark-800/80 hover:border-white/20 hover:-translate-y-1 hover:shadow-xl" : "";
-    const glowClasses = glow ? "hover:shadow-primary-500/10 box-glow" : "";
+    const baseClasses = "bg-white border border-gray-100 rounded-[20px] p-6 shadow-sm";
+    const hoverClasses = hover ? "transition-all duration-300 hover:border-gray-200 hover:-translate-y-1 hover:shadow-card-hover" : "";
+    const glowClasses = glow ? "hover:shadow-led relative overflow-hidden" : "";
 
     return (
         <motion.div
@@ -19,7 +19,7 @@ export const Card = ({ children, className = '', hover = true, glow = false }) =
 
 export const GlassCard = ({ children, className = '', hover = true }) => {
     const baseClasses = "glass p-6";
-    const hoverClasses = hover ? "transition-all duration-300 hover:bg-white/[0.08] hover:border-white/20 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-500/10" : "";
+    const hoverClasses = hover ? "transition-all duration-300 hover:bg-white/90 hover:border-white hover:-translate-y-1 hover:shadow-lg hover:shadow-accent-500/10" : "";
 
     return (
         <div className={`${baseClasses} ${hoverClasses} ${className}`}>
