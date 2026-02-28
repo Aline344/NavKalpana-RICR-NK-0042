@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Split from 'react-split';
 import Editor from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
+import axios from 'axios';
 import { Play, Send, ChevronLeft, CheckCircle, XCircle, Loader, TerminalSquare, AlertCircle } from 'lucide-react';
 
-const CodeChallenge = () => {
+const SolveProblem = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -29,21 +30,17 @@ const CodeChallenge = () => {
     const fetchAssignment = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`/api/assignments/${id}`, {
+            const res = await axios.get(`/api/assignments/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const data = await res.json();
+            const data = res.data;
 
-            if (res.ok) {
-                setAssignment(data);
-                // Set initial code based on map or fallback
-                if (data.startingCode && data.startingCode[language]) {
-                    setCode(data.startingCode[language]);
-                } else {
-                    setCode('// Start writing your code here...');
-                }
+            setAssignment(data);
+            // Set initial code based on map or fallback
+            if (data.startingCode && data.startingCode[language]) {
+                setCode(data.startingCode[language]);
             } else {
-                throw new Error(data.message);
+                setCode('// Start writing your code here...');
             }
         } catch (error) {
             console.error("Failed to load assignment", error);
@@ -66,17 +63,12 @@ const CodeChallenge = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`/api/assignments/run`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ assignmentId: id, language, code })
-            });
+            const res = await axios.post(`/api/assignments/run`,
+                { assignmentId: id, language, code },
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
 
-            const data = await res.json();
-            setExecutionResult(data);
+            setExecutionResult(res.data);
         } catch (error) {
             setExecutionResult({ success: false, errorType: 'Network Error', error: error.message });
         } finally {
@@ -90,16 +82,12 @@ const CodeChallenge = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`/api/assignments/submit`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ assignmentId: id, language, code })
-            });
+            const res = await axios.post(`/api/assignments/submit`,
+                { assignmentId: id, language, code },
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
 
-            const data = await res.json();
+            const data = res.data;
             setExecutionResult(data.executionResults);
 
             // Switch to submissions tab
@@ -125,14 +113,14 @@ const CodeChallenge = () => {
             {/* Top Navbar */}
             <header className="h-14 border-b border-gray-200 bg-white flex items-center justify-between px-4 shrink-0 shadow-sm z-10">
                 <div className="flex items-center gap-3">
-                    <button onClick={() => navigate('/practice')} className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md transition-colors">
+                    <button onClick={() => navigate('/assignments')} className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md transition-colors">
                         <ChevronLeft size={20} />
                     </button>
                     <div className="flex gap-2 items-center">
                         <h1 className="font-bold text-gray-900 line-clamp-1">{assignment.title}</h1>
                         <span className={`text-[10px] px-2 py-0.5 rounded border uppercase font-bold ${assignment.difficulty <= 2 ? 'bg-emerald-50 border-emerald-200 text-emerald-600' :
-                                assignment.difficulty === 3 ? 'bg-amber-50 border-amber-200 text-amber-600' :
-                                    'bg-red-50 border-red-200 text-red-600'
+                            assignment.difficulty === 3 ? 'bg-amber-50 border-amber-200 text-amber-600' :
+                                'bg-red-50 border-red-200 text-red-600'
                             }`}>
                             {assignment.difficulty <= 2 ? 'Easy' : assignment.difficulty === 3 ? 'Medium' : 'Hard'}
                         </span>
@@ -179,8 +167,8 @@ const CodeChallenge = () => {
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`px-4 py-2.5 text-sm font-medium capitalize border-b-2 transition-colors ${activeTab === tab
-                                        ? 'border-primary-500 text-primary-600 bg-white'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100/50'
+                                    ? 'border-primary-500 text-primary-600 bg-white'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100/50'
                                     }`}
                             >
                                 {tab}
@@ -375,4 +363,4 @@ const CodeChallenge = () => {
     );
 };
 
-export default CodeChallenge;
+export default SolveProblem;

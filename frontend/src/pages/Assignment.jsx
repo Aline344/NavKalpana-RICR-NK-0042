@@ -168,7 +168,7 @@ const AssignmentList = () => {
                                 {loading && <div className="px-4 py-12 text-center flex justify-center"><Loader className="animate-spin text-primary-500" /></div>}
 
                                 {!loading && paginatedData.map((p, i) => (
-                                    <div key={p._id} onClick={() => navigate(`/assignments/${p._id}`)} className={`grid grid-cols-12 gap-4 px-4 py-3.5 items-center hover:bg-gray-50 transition-colors cursor-pointer ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
+                                    <div key={p._id} onClick={() => navigate(`/solve/${p._id}`)} className={`grid grid-cols-12 gap-4 px-4 py-3.5 items-center hover:bg-gray-50 transition-colors cursor-pointer ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
                                         <div className="col-span-1 flex justify-center">{getStatusIcon(p.status)}</div>
                                         <div className="col-span-6 font-medium text-gray-900 group flex items-center gap-2 truncate">
                                             <span className="group-hover:text-primary-600 transition-colors truncate">{p.title}</span>

@@ -53,7 +53,7 @@ const Footer = () => {
                                 <Mail size={14} className="text-amber-500" /> support@acie.ai
                             </li>
                             <li className="flex items-center gap-2 text-muted-foreground text-sm">
-                                <Phone size={14} className="text-amber-500" /> +91 98765 43210
+                                <Phone size={14} className="text-amber-500" /> +91 7400718966
                             </li>
                             <li className="flex items-center gap-2 text-muted-foreground text-sm">
                                 <MapPin size={14} className="text-amber-500" /> India

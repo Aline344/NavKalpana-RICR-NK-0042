@@ -11,7 +11,7 @@ import Resume from './pages/Resume';
 import Quiz from './pages/Quiz';
 import QuizAttempt from './pages/QuizAttempt';
 import Assignment from './pages/Assignment';
-import CodeChallenge from './pages/CodeChallenge';
+import SolveProblem from './pages/SolveProblem';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
@@ -68,7 +68,7 @@ const AppContent = () => {
                         <Route path="/quiz" element={<ProtectedRoute><AnimatedPage><Quiz /></AnimatedPage></ProtectedRoute>} />
                         <Route path="/quiz/:id" element={<ProtectedRoute><AnimatedPage><QuizAttempt /></AnimatedPage></ProtectedRoute>} />
                         <Route path="/assignments" element={<ProtectedRoute><AnimatedPage><Assignment /></AnimatedPage></ProtectedRoute>} />
-                        <Route path="/assignments/:id" element={<ProtectedRoute><AnimatedPage><CodeChallenge /></AnimatedPage></ProtectedRoute>} />
+                        <Route path="/solve/:id" element={<ProtectedRoute><AnimatedPage><SolveProblem /></AnimatedPage></ProtectedRoute>} />
                         <Route path="/dashboard" element={<ProtectedRoute><AnimatedPage><Dashboard /></AnimatedPage></ProtectedRoute>} />
                         <Route path="/profile" element={<ProtectedRoute><AnimatedPage><Profile /></AnimatedPage></ProtectedRoute>} />
                         <Route path="/admin" element={<ProtectedRoute><AnimatedPage><Admin /></AnimatedPage></ProtectedRoute>} />
