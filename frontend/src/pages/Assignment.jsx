@@ -1,341 +1,318 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
-import { Code2, Upload, CheckCircle, Clock, Lightbulb, BarChart3, Plus, Github, FileText, Sparkles, ArrowLeft, ArrowRight, CalendarDays } from 'lucide-react';
-import { ListSkeleton, NeuralLoading } from '../components/LoadingSkeletons';
+import { useAuth } from '../context/AuthContext';
+import { Search, Filter, Code2, CheckCircle, Circle, Play, ChevronLeft, ChevronRight, Clock, Target, Flame, ArrowUpDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
-const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
+const fadeUp = { hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
+const stagger = { visible: { transition: { staggerChildren: 0.05 } } };
 
-const Assignment = () => {
-    const { user } = useAuth();
-    const [assignments, setAssignments] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [generating, setGenerating] = useState(false);
-    const [topic, setTopic] = useState('JavaScript');
-    const [type, setType] = useState('');
-    const [selectedAssignment, setSelectedAssignment] = useState(null);
-    const [submissionContent, setSubmissionContent] = useState('');
-    const [submissionType, setSubmissionType] = useState('code');
-    const [submitting, setSubmitting] = useState(false);
-    const [showResults, setShowResults] = useState(null);
-    const [error, setError] = useState(null);
+const mockProblems = [
+    { id: 1, title: 'Two Sum', difficulty: 'Easy', acceptance: '52.3%', tags: ['Array', 'Hash Table'], status: 'solved', type: 'coding' },
+    { id: 2, title: 'Reverse Linked List', difficulty: 'Easy', acceptance: '75.1%', tags: ['Linked List', 'Recursion'], status: 'todo', type: 'coding' },
+    { id: 3, title: 'Implement JWT Auth', difficulty: 'Medium', acceptance: '41.2%', tags: ['Security', 'Node.js'], status: 'todo', type: 'mini-project' },
+    { id: 4, title: 'Optimize React Renders', difficulty: 'Hard', acceptance: '28.5%', tags: ['React', 'Performance'], status: 'attempted', type: 'debugging' },
+    { id: 5, title: 'Design URL Shortener', difficulty: 'Medium', acceptance: '35.9%', tags: ['System Design'], status: 'todo', type: 'system-design' },
+    { id: 6, title: 'Binary Tree Level Order', difficulty: 'Medium', acceptance: '65.2%', tags: ['Tree', 'BFS'], status: 'todo', type: 'coding' },
+    { id: 7, title: 'Merge K Sorted Lists', difficulty: 'Hard', acceptance: '51.4%', tags: ['Heap', 'Divide & Conquer'], status: 'solved', type: 'coding' },
+    { id: 8, title: 'Build Chat Application', difficulty: 'Hard', acceptance: '15.2%', tags: ['WebSockets', 'React'], status: 'todo', type: 'mini-project' },
+    { id: 9, title: 'Valid Parentheses', difficulty: 'Easy', acceptance: '40.2%', tags: ['String', 'Stack'], status: 'todo', type: 'coding' },
+    { id: 10, title: 'Longest Substring', difficulty: 'Medium', acceptance: '34.5%', tags: ['Hash Table', 'Sliding Window'], status: 'todo', type: 'coding' },
+    { id: 11, title: 'Regular Expression', difficulty: 'Hard', acceptance: '28.4%', tags: ['String', 'DP'], status: 'todo', type: 'coding' },
+    { id: 12, title: 'Container With Most Water', difficulty: 'Medium', acceptance: '54.5%', tags: ['Array', 'Two Pointers'], status: 'solved', type: 'coding' },
+];
+
+const Practice = () => {
+    const [search, setSearch] = useState('');
+    const [filterDiff, setFilterDiff] = useState('All');
+    const [filterTag, setFilterTag] = useState('All');
+    const [filterStatus, setFilterStatus] = useState('All');
+    const [sortBy, setSortBy] = useState('id'); // 'id', 'acceptance', 'difficulty'
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 3;
+    const [showDetail, setShowDetail] = useState(false);
+    const [selectedProblem, setSelectedProblem] = useState(null);
+    const itemsPerPage = 10;
 
-    const topics = ['JavaScript', 'React', 'Node.js', 'Data Structures', 'Python', 'SQL'];
-    const types = ['', 'coding', 'mini-project', 'case-study', 'analytical', 'debugging', 'system-design'];
+    const allTags = [...new Set(mockProblems.flatMap(p => p.tags))];
 
-    useEffect(() => { fetchAssignments(); }, []);
+    // Sorting Logic
+    const getSortedProblems = (problems) => {
+        return [...problems].sort((a, b) => {
+            if (sortBy === 'acceptance') {
+                return parseFloat(b.acceptance) - parseFloat(a.acceptance);
+            }
+            if (sortBy === 'difficulty') {
+                const order = { 'Hard': 3, 'Medium': 2, 'Easy': 1 };
+                return order[b.difficulty] - order[a.difficulty];
+            }
+            return a.id - b.id; // default
+        });
+    };
 
-    const fetchAssignments = async () => {
-        try {
-            const { data } = await axios.get('/api/assignment');
-            setAssignments(data);
-        } catch (err) {
-            console.error('Assignment fetch error:', err);
-            setError('Failed to fetch assignments. Please try again later.');
+    // Filtering Logic
+    const filtered = getSortedProblems(mockProblems).filter(p => {
+        const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
+        const matchDiff = filterDiff === 'All' || p.difficulty === filterDiff;
+        const matchTag = filterTag === 'All' || p.tags.includes(filterTag);
+        const matchStatus = filterStatus === 'All' || p.status === filterStatus;
+        return matchSearch && matchDiff && matchTag && matchStatus;
+    });
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const paginatedData = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    // Color/Icon Helpers
+    const getDiffColor = (diff) => {
+        switch (diff) {
+            case 'Easy': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
+            case 'Medium': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
+            case 'Hard': return 'text-red-500 bg-red-500/10 border-red-500/20';
+            default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
         }
-        setLoading(false);
     };
 
-    const handleGenerate = async () => {
-        setGenerating(true);
-        try {
-            const { data } = await axios.post('/api/assignment/generate', { topic, type: type || undefined });
-            setAssignments([data, ...assignments]);
-        } catch (err) {
-            console.error('Assignment generation error:', err);
-            alert('Failed to generate assignment using AI. Please check your connection.');
-        }
-        setGenerating(false);
+    const getStatusIcon = (status) => {
+        if (status === 'solved') return <CheckCircle size={16} className="text-emerald-500" />;
+        if (status === 'attempted') return <Clock size={16} className="text-amber-500" />;
+        return <Circle size={16} className="text-gray-300" />;
     };
 
-    const handleSubmit = async () => {
-        if (!submissionContent.trim() || !selectedAssignment) return;
-        setSubmitting(true);
-        try {
-            const { data } = await axios.post('/api/assignment/submit', { assignmentId: selectedAssignment._id, submissionType, content: submissionContent });
-            setAssignments(assignments.map(a => a._id === data._id ? data : a));
-            setShowResults(data);
-            setSelectedAssignment(null);
-        } catch {
-            const evaluated = { ...selectedAssignment, status: 'evaluated', evaluation: { score: 72, logicalCorrectness: 75, conceptApplication: 70, codeStructure: 78, completeness: 65, efficiency: 68, improvements: ['Add error handling', 'Improve code structure', 'Cover more edge cases'], conceptCoverage: selectedAssignment.requirements.map(r => ({ concept: r, covered: Math.random() > 0.3 })), mistakeBreakdown: [{ area: 'Completeness', description: 'Some requirements not fully addressed' }] } };
-            setAssignments(assignments.map(a => a._id === evaluated._id ? evaluated : a));
-            setShowResults(evaluated);
-            setSelectedAssignment(null);
-        }
-        setSubmitting(false);
-        setSubmissionContent('');
-    };
-
-    const getStatusBadge = (status) => {
-        if (status === 'pending') return 'badge-warning';
-        if (status === 'submitted') return 'badge-info';
-        return 'badge-success';
-    };
-
-    const getTypeIcon = (t) => {
-        const icons = { coding: <Code2 size={16} />, 'mini-project': <FileText size={16} />, 'case-study': <FileText size={16} />, debugging: <Code2 size={16} />, 'system-design': <BarChart3 size={16} />, analytical: <Lightbulb size={16} /> };
-        return icons[t] || <Code2 size={16} />;
+    const handleOpenProblem = (problem) => {
+        setSelectedProblem(problem);
+        setShowDetail(true);
     };
 
     return (
-        <div className="pt-20 pb-10 min-h-screen">
-            <div className="absolute inset-0 bg-hero-gradient -z-10" />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <motion.div initial="hidden" animate="visible" variants={stagger}>
-                    {/* Header */}
-                    <motion.div variants={fadeUp} className="text-center mb-10">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 glass rounded-full mb-4">
-                            <Sparkles size={13} className="text-cyber-400" />
-                            <span className="text-sm text-gray-300">AI Assignment Engine</span>
-                        </div>
-                        <h1 className="text-3xl sm:text-4xl font-display font-bold">
-                            <span className="gradient-text">Smart Assignments</span>
-                        </h1>
-                        <p className="text-gray-400 mt-2">AI-generated practical tasks with automated evaluation</p>
-                    </motion.div>
+        <div className="pt-24 pb-12 min-h-screen bg-gray-50">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
-                    {/* Generate Panel */}
-                    <motion.div variants={fadeUp} className="glass-strong p-5 rounded-2xl mb-6">
-                        <div className="flex flex-col sm:flex-row items-end gap-3">
-                            <div className="flex-1 w-full">
-                                <label className="text-xs text-gray-400 mb-1 block">Topic</label>
-                                <select value={topic} onChange={e => setTopic(e.target.value)} className="input-field !py-2.5 text-sm">
-                                    {topics.map(t => <option key={t} value={t} className="bg-dark-800">{t}</option>)}
+                <motion.div initial="hidden" animate="visible" variants={stagger} className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+
+                    {/* Main Content (3 Columns) */}
+                    <div className="lg:col-span-3 space-y-6">
+
+                        {/* Header & Tabs */}
+                        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-2">
+                            <div>
+                                <h1 className="text-3xl font-display font-bold text-gray-900 mb-1">Practice <span className="text-primary-600">Hub</span></h1>
+                                <p className="text-gray-500 text-sm">Curated challenges to master technical concepts.</p>
+                            </div>
+                        </motion.div>
+
+                        {/* Top Control Bar */}
+                        <motion.div variants={fadeUp} className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center relative z-10">
+
+                            {/* Filter Chips */}
+                            <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
+                                <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }} className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 cursor-pointer focus:ring-1 focus:ring-primary-500 outline-none">
+                                    <option value="All">Status: All</option>
+                                    <option value="solved">Solved</option>
+                                    <option value="todo">Todo</option>
+                                    <option value="attempted">Attempted</option>
+                                </select>
+                                <select value={filterDiff} onChange={(e) => { setFilterDiff(e.target.value); setCurrentPage(1); }} className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 cursor-pointer focus:ring-1 focus:ring-primary-500 outline-none">
+                                    <option value="All">Difficulty: All</option>
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Hard">Hard</option>
+                                </select>
+                                <select value={filterTag} onChange={(e) => { setFilterTag(e.target.value); setCurrentPage(1); }} className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-3 py-2 cursor-pointer focus:ring-1 focus:ring-primary-500 outline-none max-w-[150px]">
+                                    <option value="All">Tags: All</option>
+                                    {allTags.map(t => <option key={t} value={t}>{t}</option>)}
                                 </select>
                             </div>
-                            <div className="flex-1 w-full">
-                                <label className="text-xs text-gray-400 mb-1 block">Type (optional)</label>
-                                <select value={type} onChange={e => setType(e.target.value)} className="input-field !py-2.5 text-sm">
-                                    {types.map(t => <option key={t} value={t} className="bg-dark-800">{t || 'Any Type'}</option>)}
-                                </select>
-                            </div>
-                            <button onClick={handleGenerate} disabled={generating} className="btn-primary flex items-center gap-2 whitespace-nowrap !py-2.5">
-                                {generating ? 'Generating...' : <><Plus size={15} /> Generate Assignment</>}
-                            </button>
-                        </div>
-                    </motion.div>
 
-                    {/* Assignment List */}
-                    <motion.div variants={fadeUp} className="space-y-4">
-                        {generating ? (
-                            <NeuralLoading type="assignment" />
-                        ) : loading ? (
-                            <ListSkeleton count={3} />
-                        ) : assignments.length === 0 ? (
-                            <div className="glass-strong p-12 rounded-2xl text-center">
-                                <Code2 size={36} className="text-gray-600 mx-auto mb-4" />
-                                <h3 className="text-white font-semibold mb-2">No Assignments Yet</h3>
-                                <p className="text-gray-400 text-sm">Generate your first AI assignment to get started!</p>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="space-y-4">
-                                    {assignments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((a, i) => (
-                                        <motion.div key={a._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                                            className="glass-strong p-5 rounded-2xl">
-                                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <span className="text-lg text-primary-400">{getTypeIcon(a.type)}</span>
-                                                        <h3 className="text-white font-semibold">{a.title}</h3>
-                                                    </div>
-                                                    <p className="text-gray-400 text-sm mb-3">{a.description}</p>
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        <span className="badge-info text-[10px]">{a.topic}</span>
-                                                        <span className="badge-info text-[10px]">{a.type}</span>
-                                                        <span className={`${getStatusBadge(a.status)} text-[10px]`}>{a.status}</span>
-                                                    </div>
-                                                    <div className="flex flex-wrap items-center gap-4 mt-2 p-2 glass rounded-lg border border-white/5 w-fit">
-                                                        <span className="text-[10px] text-gray-400 flex items-center gap-1"><CalendarDays size={11} className="text-primary-400" /> Assigned: {new Date(a.createdAt).toLocaleDateString()}</span>
-                                                        <span className="text-[10px] text-gray-400 flex items-center gap-1"><Clock size={11} className="text-accent-400" /> Due: {new Date(a.dueDate).toLocaleDateString()}</span>
-                                                    </div>
-                                                    {a.requirements && (
-                                                        <div className="mt-3">
-                                                            <p className="text-xs text-gray-500 mb-1.5">Requirements:</p>
-                                                            <ul className="space-y-1">
-                                                                {a.requirements.map((r, ri) => (
-                                                                    <li key={ri} className="text-xs text-gray-400 flex items-start gap-1.5">
-                                                                        <span className="text-primary-400 mt-0.5">•</span> {r}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex flex-col items-end gap-2 min-w-[120px]">
-                                                    {a.status === 'evaluated' && a.evaluation && (
-                                                        <div className="text-center">
-                                                            <p className={`text-2xl font-bold ${a.evaluation.score >= 80 ? 'text-emerald-400' : a.evaluation.score >= 60 ? 'text-amber-400' : 'text-red-400'}`}>{a.evaluation.score}%</p>
-                                                            <p className="text-xs text-gray-500">Score</p>
-                                                            <button onClick={() => setShowResults(a)} className="text-xs text-primary-400 hover:underline mt-1">View Details</button>
-                                                        </div>
-                                                    )}
-                                                    {a.status === 'pending' && (
-                                                        <button onClick={() => setSelectedAssignment(a)} className="btn-primary text-sm !py-2 !px-4">
-                                                            Submit Work
-                                                        </button>
-                                                    )}
-                                                    {a.status === 'submitted' && (
-                                                        <span className="text-xs text-gray-400">Evaluating...</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    ))}
+                            {/* Search & Sort */}
+                            <div className="flex gap-2 w-full md:w-auto">
+                                <div className="relative w-full md:w-64">
+                                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search by title..."
+                                        value={search}
+                                        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                                        className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2 focus:ring-1 focus:ring-primary-500 outline-none"
+                                    />
                                 </div>
+                            </div>
+                        </motion.div>
 
-                                {assignments.length > itemsPerPage && (
-                                    <div className="flex justify-center items-center gap-4 mt-8">
-                                        <button
-                                            disabled={currentPage === 1}
-                                            onClick={() => setCurrentPage(p => p - 1)}
-                                            className="btn-secondary !py-2 !px-4 disabled:opacity-30 flex items-center gap-2"
-                                        >
-                                            <ArrowLeft size={16} /> Prev
-                                        </button>
-                                        <span className="text-sm font-medium text-gray-400 glass px-4 py-2 rounded-xl border border-white/5">
-                                            Page <span className="text-white">{currentPage}</span> of {Math.ceil(assignments.length / itemsPerPage)}
-                                        </span>
-                                        <button
-                                            disabled={currentPage >= Math.ceil(assignments.length / itemsPerPage)}
-                                            onClick={() => setCurrentPage(p => p + 1)}
-                                            className="btn-secondary !py-2 !px-4 disabled:opacity-30 flex items-center gap-2"
-                                        >
-                                            Next <ArrowRight size={16} />
-                                        </button>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </motion.div>
+                        {/* Problems Table */}
+                        <motion.div variants={fadeUp} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm relative z-0">
+                            {/* Table Header with Sort */}
+                            <div className="grid grid-cols-12 gap-4 border-b border-gray-100 bg-gray-50 px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                <div className="col-span-1 text-center">Sta</div>
+                                <div className="col-span-5 flex items-center gap-1 cursor-pointer hover:text-gray-700" onClick={() => setSortBy('id')}>
+                                    Title {sortBy === 'id' && <ArrowUpDown size={12} />}
+                                </div>
+                                <div className="col-span-2 hidden sm:flex items-center gap-1 cursor-pointer hover:text-gray-700" onClick={() => setSortBy('acceptance')}>
+                                    Acceptance {sortBy === 'acceptance' && <ArrowUpDown size={12} />}
+                                </div>
+                                <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:text-gray-700" onClick={() => setSortBy('difficulty')}>
+                                    Difficulty {sortBy === 'difficulty' && <ArrowUpDown size={12} />}
+                                </div>
+                                <div className="col-span-2 hidden md:block">Tags</div>
+                            </div>
 
-                    {/* Submission Modal */}
-                    <AnimatePresence>
-                        {selectedAssignment && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-                                onClick={() => setSelectedAssignment(null)}>
-                                <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-                                    className="glass-strong p-6 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-                                    onClick={e => e.stopPropagation()}>
-                                    <h2 className="text-lg font-semibold text-white mb-1">{selectedAssignment.title}</h2>
-                                    <p className="text-sm text-gray-400 mb-4">{selectedAssignment.description}</p>
-
-                                    <div className="mb-4">
-                                        <label className="text-sm text-gray-400 mb-1.5 block">Submission Type</label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {[
-                                                { key: 'code', label: 'Code', icon: <Code2 size={13} /> },
-                                                { key: 'text', label: 'Text', icon: <FileText size={13} /> },
-                                                { key: 'github-link', label: 'GitHub', icon: <Github size={13} /> },
-                                                { key: 'file', label: 'File', icon: <Upload size={13} /> }
-                                            ].map(t => (
-                                                <button key={t.key} onClick={() => setSubmissionType(t.key)}
-                                                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${submissionType === t.key ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'glass text-gray-400 hover:text-white'}`}>
-                                                    {t.icon} {t.label}
-                                                </button>
+                            {/* Table Body */}
+                            <div className="divide-y divide-gray-100">
+                                {paginatedData.map((p, i) => (
+                                    <div key={p.id} onClick={() => handleOpenProblem(p)} className={`grid grid-cols-12 gap-4 px-4 py-3.5 items-center hover:bg-gray-50 transition-colors cursor-pointer ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
+                                        <div className="col-span-1 flex justify-center">{getStatusIcon(p.status)}</div>
+                                        <div className="col-span-5 font-medium text-gray-900 group flex items-center gap-2 truncate">
+                                            <span className="text-gray-400 text-xs w-5 text-right font-mono">{p.id}.</span>
+                                            <span className="group-hover:text-primary-600 transition-colors truncate">{p.title}</span>
+                                        </div>
+                                        <div className="col-span-2 hidden sm:block text-sm text-gray-500 font-mono">{p.acceptance}</div>
+                                        <div className="col-span-2">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${getDiffColor(p.difficulty)}`}>
+                                                {p.difficulty}
+                                            </span>
+                                        </div>
+                                        <div className="col-span-2 hidden md:flex flex-wrap gap-1">
+                                            {p.tags.slice(0, 2).map(t => (
+                                                <span key={t} className="text-[10px] bg-gray-100 text-gray-500 border border-gray-200 px-1.5 py-0.5 rounded-md truncate max-w-[80px]">{t}</span>
                                             ))}
                                         </div>
                                     </div>
-
-                                    <div className="mb-4">
-                                        <label className="text-sm text-gray-400 mb-1.5 block">Your Submission</label>
-                                        <textarea value={submissionContent} onChange={e => setSubmissionContent(e.target.value)}
-                                            rows={12} className="input-field resize-none font-mono text-sm" placeholder={submissionType === 'code' ? '// Write your code here...' : submissionType === 'github-link' ? 'https://github.com/...' : submissionType === 'file' ? 'Paste Google Drive / Dropbox link here (or text content of the file)...' : 'Write your answer here...'} />
+                                ))}
+                                {filtered.length === 0 && (
+                                    <div className="px-4 py-12 text-center text-gray-500">
+                                        No problems match your current filters.
                                     </div>
+                                )}
+                            </div>
 
-                                    <div className="flex gap-3">
-                                        <button onClick={() => setSelectedAssignment(null)} className="btn-secondary flex-1">Cancel</button>
-                                        <button onClick={handleSubmit} disabled={submitting || !submissionContent.trim()} className="btn-primary flex-1">
-                                            {submitting ? 'Submitting...' : 'Submit for Evaluation'}
-                                        </button>
+                            {/* Pagination */}
+                            {filtered.length > 0 && (
+                                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+                                    <span className="text-xs font-medium text-gray-500">Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filtered.length)} to {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length}</span>
+                                    <div className="flex gap-1">
+                                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded disabled:opacity-30 disabled:hover:bg-transparent"><ChevronLeft size={16} /></button>
+                                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded disabled:opacity-30 disabled:hover:bg-transparent"><ChevronRight size={16} /></button>
                                     </div>
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                                </div>
+                            )}
+                        </motion.div>
+                    </div>
 
-                    {/* Results Modal */}
-                    <AnimatePresence>
-                        {showResults?.evaluation && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-                                onClick={() => setShowResults(null)}>
-                                <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-                                    className="glass-strong p-6 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-                                    onClick={e => e.stopPropagation()}>
-                                    <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                        <BarChart3 size={16} className="text-primary-400" /> Evaluation Results
-                                    </h2>
+                    {/* Right Sidebar Widgets */}
+                    <motion.div variants={fadeUp} className="lg:col-span-1 space-y-6">
 
-                                    {/* Score */}
-                                    <div className="text-center mb-6">
-                                        <p className={`text-4xl font-bold ${showResults.evaluation.score >= 80 ? 'text-emerald-400' : showResults.evaluation.score >= 60 ? 'text-amber-400' : 'text-red-400'}`}>{showResults.evaluation.score}%</p>
-                                        <p className="text-sm text-gray-400 mt-1">Assignment Score</p>
-                                    </div>
+                        {/* Daily Challenge */}
+                        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                            <div className="bg-gradient-to-r from-primary-600 to-accent-600 p-4 text-white p-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Target size={16} className="text-white/80" />
+                                    <h3 className="text-sm font-bold uppercase tracking-wider">Problem of the Day</h3>
+                                </div>
+                                <p className="text-xs text-white/70">April 14, 2026</p>
+                            </div>
+                            <div className="p-5">
+                                <h4 className="font-bold text-gray-900 mb-2">Merge Intervals</h4>
+                                <div className="flex gap-2 mb-4">
+                                    <span className="text-xs px-2 py-0.5 rounded border text-amber-500 bg-amber-50 border-amber-200 font-semibold">Medium</span>
+                                    <span className="text-xs px-2 py-0.5 rounded border text-gray-500 bg-gray-50 border-gray-200">Array</span>
+                                </div>
+                                <button className="w-full btn-primary !py-2 !text-sm flex justify-center items-center gap-2">Solve Now <Play size={14} /></button>
+                            </div>
+                        </div>
 
-                                    {/* Metrics */}
-                                    <div className="space-y-3 mb-5">
-                                        {[
-                                            { label: 'Logical Correctness', val: showResults.evaluation.logicalCorrectness },
-                                            { label: 'Concept Application', val: showResults.evaluation.conceptApplication },
-                                            { label: 'Code Structure', val: showResults.evaluation.codeStructure },
-                                            { label: 'Completeness', val: showResults.evaluation.completeness },
-                                            { label: 'Efficiency', val: showResults.evaluation.efficiency },
-                                        ].map((m, i) => (
-                                            <div key={i}>
-                                                <div className="flex justify-between text-sm mb-1">
-                                                    <span className="text-gray-400">{m.label}</span>
-                                                    <span className={m.val >= 80 ? 'text-emerald-400' : m.val >= 60 ? 'text-amber-400' : 'text-red-400'}>{m.val}%</span>
-                                                </div>
-                                                <div className="progress-bar"><div className={`progress-fill ${m.val >= 80 ? 'bg-emerald-500' : m.val >= 60 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${m.val}%` }} /></div>
-                                            </div>
-                                        ))}
-                                    </div>
+                        {/* Streak Widget */}
+                        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2 text-gray-900 font-bold">
+                                    <Flame size={18} className="text-orange-500" />
+                                    <span>Current Streak</span>
+                                </div>
+                                <span className="text-xl font-display font-black text-orange-500">12<span className="text-sm text-gray-400 font-medium ml-1">Days</span></span>
+                            </div>
 
-                                    {/* Mistake Breakdown */}
-                                    {showResults.evaluation.mistakeBreakdown && showResults.evaluation.mistakeBreakdown.length > 0 && (
-                                        <div className="glass p-4 rounded-xl mb-4 border-l-4 border-red-500">
-                                            <h3 className="text-sm font-medium text-red-400 mb-2 flex items-center gap-2"><BarChart3 size={14} /> Mistake Breakdown</h3>
-                                            <ul className="space-y-1.5">
-                                                {showResults.evaluation.mistakeBreakdown.map((m, i) => (
-                                                    <li key={i} className="text-xs text-gray-400">
-                                                        <span className="text-red-400 font-bold uppercase text-[9px] block mb-0.5">{m.area}</span>
-                                                        {m.description}
-                                                    </li>
-                                                ))}
-                                            </ul>
+                            <div className="flex justify-between items-center text-center">
+                                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                                    <div key={i} className="flex flex-col items-center gap-2">
+                                        <span className="text-[10px] text-gray-400 font-medium">{day}</span>
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center border ${i < 5 ? 'bg-orange-100 border-orange-200 text-orange-500' : 'bg-gray-50 border-gray-200 text-transparent'}`}>
+                                            {i < 5 && <CheckCircle size={10} />}
                                         </div>
-                                    )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
 
-                                    {/* Improvements */}
-                                    {showResults.evaluation.improvements && (
-                                        <div className="glass p-4 rounded-xl mb-4">
-                                            <h3 className="text-sm font-medium text-amber-400 mb-2 flex items-center gap-2"><Lightbulb size={14} /> Improvement Suggestions</h3>
-                                            <ul className="space-y-1.5">
-                                                {showResults.evaluation.improvements.map((imp, i) => (
-                                                    <li key={i} className="text-xs text-gray-400 flex items-start gap-1.5">
-                                                        <span className="text-amber-400 mt-0.5">→</span> {imp}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
+                        {/* Session Stats */}
+                        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                            <h3 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Session Progress</h3>
 
-                                    <button onClick={() => setShowResults(null)} className="btn-primary w-full">Close</button>
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between text-xs mb-1">
+                                        <span className="text-gray-500">Easy Solved</span>
+                                        <span className="font-bold text-emerald-500">24 <span className="text-gray-400 font-normal">/ 50</span></span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-emerald-500 w-[48%] rounded-full" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-xs mb-1">
+                                        <span className="text-gray-500">Medium Solved</span>
+                                        <span className="font-bold text-amber-500">12 <span className="text-gray-400 font-normal">/ 40</span></span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-amber-500 w-[30%] rounded-full" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-xs mb-1">
+                                        <span className="text-gray-500">Hard Solved</span>
+                                        <span className="font-bold text-red-500">3 <span className="text-gray-400 font-normal">/ 20</span></span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-red-500 w-[15%] rounded-full" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </motion.div>
                 </motion.div>
             </div>
+
+            {/* Problem Details Drawer/Split Placeholder */}
+            {showDetail && selectedProblem && (
+                <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white border-l border-gray-200 shadow-2xl z-50 transform transition-transform overflow-y-auto">
+                    <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 sticky top-0">
+                        <h2 className="font-bold text-gray-900">{selectedProblem.id}. {selectedProblem.title}</h2>
+                        <button onClick={() => setShowDetail(false)} className="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors"><ChevronRight size={18} /></button>
+                    </div>
+                    <div className="p-6">
+                        <div className="flex gap-2 mb-6">
+                            <span className={`inline-flex px-2.5 py-1 rounded-md text-xs font-semibold border ${getDiffColor(selectedProblem.difficulty)}`}>{selectedProblem.difficulty}</span>
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200 transition-colors cursor-pointer">Acceptance: {selectedProblem.acceptance}</span>
+                        </div>
+
+                        <div className="prose prose-sm max-w-none text-gray-700">
+                            <p>This is a placeholder description for the problem. To complete the refactoring, this space would load the problem constraints, examples, and the code editor layout.</p>
+                            <h4>Examples:</h4>
+                            <pre className="bg-gray-100 p-3 rounded-lg border border-gray-200 text-xs"><code>Input: nums = [2,7,11,15], target = 9{'\n'}Output: [0,1]</code></pre>
+
+                            <div className="mt-8 flex gap-3">
+                                <Link to={`/practice/${selectedProblem.id}`} className="btn-primary w-full text-center py-3">Open in Editor</Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Backdrop for drawer */}
+            {showDetail && (
+                <div className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40 transition-opacity md:hidden" onClick={() => setShowDetail(false)} />
+            )}
+
         </div>
     );
 };
 
-export default Assignment;
+export default Practice;
